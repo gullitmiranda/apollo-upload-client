@@ -1,6 +1,8 @@
 import { HTTPBatchedNetworkInterface, printAST } from 'apollo-client'
 import { extractFiles } from 'extract-files'
 
+import objectToFormData from './utils/objectToFormData'
+
 export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterface {
   batchedFetchFromRemoteEndpoint({ requests, options }) {
     // Continue if uploads are possible
@@ -20,7 +22,8 @@ export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterfa
         })
 
         // Construct a multipart form
-        const formData = new FormData()
+        let formData = new FormData()
+        formData = objectToFormData(requests, formData)
         formData.append('operations', JSON.stringify(requests))
         files.forEach(({ path, file }) => formData.append(path, file))
 
