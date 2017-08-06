@@ -1,14 +1,20 @@
 import { HTTPBatchedNetworkInterface, printAST } from 'apollo-client'
 import { extractFiles } from 'extract-files'
 
+import objectToFormData from './utils/objectToFormData'
+
 export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterface {
   batchedFetchFromRemoteEndpoint({ requests, options }) {
+    const { customExtractFiles = extractFiles, ...restOptions } = options
+
     // Continue if uploads are possible
     if (typeof FormData !== 'undefined') {
       // Extract any files from the each request variables
       const files = requests.reduce(
         (files, request, index) =>
-          files.concat(extractFiles(request.variables, `${index}.variables`)),
+          files.concat(
+            customExtractFiles(request.variables, `${index}.variables`)
+          ),
         []
       )
 
@@ -20,7 +26,8 @@ export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterfa
         })
 
         // Construct a multipart form
-        const formData = new FormData()
+        let formData = new FormData()
+        formData = objectToFormData(requests, formData)
         formData.append('operations', JSON.stringify(requests))
         files.forEach(({ path, file }) => formData.append(path, file))
 
@@ -28,13 +35,16 @@ export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterfa
         return fetch(this._uri, {
           method: 'POST',
           body: formData,
-          ...options
+          ...restOptions
         })
       }
     }
 
     // Standard fetch method fallback
-    return super.batchedFetchFromRemoteEndpoint({ requests, options })
+    return super.batchedFetchFromRemoteEndpoint({
+      requests,
+      options: restOptions
+    })
   }
 }
 
