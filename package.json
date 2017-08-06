@@ -43,6 +43,7 @@
     "lint": "eslint .",
     "prebuild": "npm run lint",
     "build": "rollup --config",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "precommit": "lint-staged"
   },
