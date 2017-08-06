@@ -5,12 +5,16 @@ import objectToFormData from './utils/objectToFormData'
 
 export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterface {
   batchedFetchFromRemoteEndpoint({ requests, options }) {
+    const { customExtractFiles = extractFiles, ...restOptions } = options
+
     // Continue if uploads are possible
     if (typeof FormData !== 'undefined') {
       // Extract any files from the each request variables
       const files = requests.reduce(
         (files, request, index) =>
-          files.concat(extractFiles(request.variables, `${index}.variables`)),
+          files.concat(
+            customExtractFiles(request.variables, `${index}.variables`)
+          ),
         []
       )
 
@@ -31,13 +35,16 @@ export class UploadHTTPBatchedNetworkInterface extends HTTPBatchedNetworkInterfa
         return fetch(this._uri, {
           method: 'POST',
           body: formData,
-          ...options
+          ...restOptions
         })
       }
     }
 
     // Standard fetch method fallback
-    return super.batchedFetchFromRemoteEndpoint({ requests, options })
+    return super.batchedFetchFromRemoteEndpoint({
+      requests,
+      options: restOptions
+    })
   }
 }
 
