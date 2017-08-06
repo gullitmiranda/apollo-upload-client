@@ -40,11 +40,11 @@
     "rollup-watch": "^4.3.1"
   },
   "scripts": {
-    "lint": "eslint .",
-    "prebuild": "npm run lint",
-    "build": "rollup --config",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run build",
+    "lint": "yarn run eslint -- .",
+    "prebuild": "yarn run lint",
+    "build": "yarn run rollup -- --config",
+    "prepare": "yarn install --ignore-scripts && yarn run build",
+    "prepublishOnly": "yarn run build",
     "precommit": "lint-staged"
   },
   "main": "dist/apollo-upload-client.js",
